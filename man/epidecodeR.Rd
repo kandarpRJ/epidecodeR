@@ -30,6 +30,7 @@ An epidecodeR object containing tables of theoretical and empirical cumulative p
 Analysis function for generating epidecodeR object. This function distributes dysregulated genes into user defined groups and calculates cumulative probabilities and ANOVA test statistics for significance testing in difference of log2FC means between groups of dysregulated genes
 }
 \examples{
-epiobj <- epidecodeR(events = "events.txt", deg = "deg.txt", param = 2, ints=c(1,7)) OR
-epiobj <- epidecodeR(events = "H3K27acChIPSeq.bed", deg = "siSDS3.txt", gtf_file = "hg38.gtf.gz", id_type = "gene_name", boundaries = 2000, pval=0.05, param = 3, ints=c(2,5))
+events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
+deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
 }

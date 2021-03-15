@@ -26,11 +26,8 @@ A CDF plot
 Generate CDF plot using epidecodeR object generated using epidecodeR function
 }
 \examples{
+events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
+deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
 p<-makeplot(epiobj, lim = c(-2,2), title = "H3K27ac", xlab = "siSDS3/WT")
-p
-OR
-p<-makeplot(epiobj, type = 't', lim = c(-2,2),  title = "H3K27ac", xlab = "siSDS3/WT")
-p
-p<-makeplot(epiobj, lim=c(-7,7), type='e')
-p
 }
