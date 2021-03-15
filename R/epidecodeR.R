@@ -1,38 +1,3 @@
-# if(!require("BiocManager")) {
-#   install.packages("BiocManager")
-#   library(BiocManager)
-# }
-#
-# if(!require("EnvStats")){
-#   install.packages("EnvStats")
-#   library(EnvStats)
-# }
-#
-# if(!require("ggplot2")){
-#   install.packages("ggplot2")
-#   library(ggplot2)
-# }
-#
-# if(!require("rtracklayer")){
-#   BiocManager::install("rtracklayer")
-#   library(rtracklayer)
-# }
-#
-# if(!require("GenomicRanges")){
-#   BiocManager::install("GenomicRanges")
-#   library(GenomicRanges)
-# }
-#
-# if (!require("rstatix")){
-#   BiocManager::install("rstatix")
-#   library(rstatix)
-# }
-#
-# if (!require("ggpubr")){
-#   BiocManager::install("ggpubr")
-#   library(ggpubr)
-# }
-
 `%notin%` <- Negate(`%in%`)
 
 #' epidecodeR object - a S4 class object
