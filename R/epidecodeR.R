@@ -1,41 +1,54 @@
-#if(!require("BiocManager")) {
-#  install.packages("BiocManager")
-  #library(BiocManager)
-#}
-
-if(!require("EnvStats")){
-  install.packages("EnvStats")
-  #library(EnvStats)
-}
-
-if(!require("ggplot2")){
-  install.packages("ggplot2")
-  #library(ggplot2)
-}
-
-if(!require("rtracklayer")){
-  BiocManager::install("rtracklayer")
-  #library(rtracklayer)
-}
-
-if(!require("GenomicRanges")){
-  BiocManager::install("GenomicRanges")
-  #library(GenomicRanges)
-}
-
-if (!require("rstatix")){
-  BiocManager::install("rstatix")
-  #library(rstatix)
-}
-
-if (!require("ggpubr")){
-  BiocManager::install("ggpubr")
-  #library(ggpubr)
-}
+# if(!require("BiocManager")) {
+#   install.packages("BiocManager")
+#   library(BiocManager)
+# }
+#
+# if(!require("EnvStats")){
+#   install.packages("EnvStats")
+#   library(EnvStats)
+# }
+#
+# if(!require("ggplot2")){
+#   install.packages("ggplot2")
+#   library(ggplot2)
+# }
+#
+# if(!require("rtracklayer")){
+#   BiocManager::install("rtracklayer")
+#   library(rtracklayer)
+# }
+#
+# if(!require("GenomicRanges")){
+#   BiocManager::install("GenomicRanges")
+#   library(GenomicRanges)
+# }
+#
+# if (!require("rstatix")){
+#   BiocManager::install("rstatix")
+#   library(rstatix)
+# }
+#
+# if (!require("ggpubr")){
+#   BiocManager::install("ggpubr")
+#   library(ggpubr)
+# }
 
 `%notin%` <- Negate(`%in%`)
 
-
+#' epidecodeR object - a S4 class object
+#'
+#' @slot t data.frame.
+#' @slot e data.frame.
+#' @slot eventcounts numeric.
+#' @slot grptables list.
+#' @slot grpcounts integer.
+#' @slot sign.test data.frame.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+setClass("epidecodeR", slots=list(t="data.frame", e="data.frame", eventcounts="numeric", grptables="list", grpcounts="integer",sign.test="data.frame"))
 
 #' Analysis function for generating epidecodeR object. This function distributes dysregulated genes into user defined groups and calculates cumulative probabilities and ANOVA test statistics for significance testing in difference of log2FC means between groups of dysregulated genes
 #'
@@ -47,12 +60,21 @@ if (!require("ggpubr")){
 #' @param pval numeric - P value cut-off of dysregulated genes in DEG file to be considered for distribution into groups. Default: 0.05
 #' @param param numeric - Defines the number and size of groups of dysregulated genes. Allowed values are param = 1 [0 events: 1+ events]; param = 2 [0 events: 1-N event: (N+1)+ event]; param = 3 [0 events; 1 event; 2-N events; (N+1)+ events]; N is user defined limit of the group provided using ints parameter
 #' @param ints vector - A vector of intervals defining limits of the degree of group for param = 2 and param = 3. e.g. c(1, 4) or c(2, 5): For param = 2, Default :c(1,4) and for param = 3, Default: c(2,5)
-#'
+#' @import dplyr
+#' @importFrom methods new
+#' @importFrom methods setClass
+#' @importFrom stats aov
+#' @importFrom stats na.omit
+#' @importFrom stats rnorm
+#' @importFrom stats sd
+#' @importFrom utils read.table
 #' @return An epidecodeR object containing tables of theoretical and empirical cumulative probabilities of the log2FC (quantiles), tables of genes distributed into user defined groups, counts of genes per user defined groups, table of one-way ANOVA significance testing for difference in mean log2FC of groups of genes
-#'
+#' @export
+#' @exportClass epidecodeR
 #' @examples
-#' epiobj <- epidecodeR(events = "events.txt", deg = "deg.txt", param = 2, ints=c(1,7)) OR
-#' epiobj <- epidecodeR(events = "H3K27acChIPSeq.bed", deg = "siSDS3.txt", gtf_file = "hg38.gtf.gz", id_type = "gene_name", boundaries = 2000, pval=0.05, param = 3, ints=c(2,5))
+#' events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
+#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
 epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, ints) {
 
   ## Check inputs and throw errors
@@ -108,15 +130,15 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
       eventcounts<-unlist(lapply (unique (file[,4]), function (x) length(which (file[,4]==x))))
       names(eventcounts)<-unique(file[,4])
     } else {
-      bed<-with(file, GRanges(seqnames = file$V1, IRanges(start = file$V2, end = file$V3)))
-      gtf<-import(gtf_file)
+      bed<-with(file, GenomicRanges::GRanges(seqnames = file$V1, IRanges(start = file$V2, end = file$V3)))
+      gtf<-rtracklayer::import(gtf_file)
       #gtf<-gtf[gtf$type=="gene",]
       #rownames(gtf)<-c(1:length(gtf[,1]))
       gtf<-gtf[,c("type", "gene_id", "gene_name")]
-      gtf<-gtf[elementMetadata(gtf)[,"type"]=="gene"]
+      gtf<-gtf[GenomicRanges::elementMetadata(gtf)[,"type"]=="gene"]
       #gtf<-makeGRangesFromDataFrame(gtf, keep.extra.columns=T)
       gtf<-gtf+boundaries
-      overlap<-suppressWarnings(findOverlaps(bed, gtf, select = "arbitrary"))
+      overlap<-suppressWarnings(GenomicRanges::findOverlaps(bed, gtf, select = "arbitrary"))
       names(overlap)<-c(1:length(overlap))
       overlap<-na.omit(overlap)
       q<-as.data.frame(bed[as.numeric(names(overlap))])
@@ -146,18 +168,18 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
   del<-del[del[,3]<=pval,]
 
   grp1<-del[del[,1] %notin% names(eventcounts),]
-  cdfdf<-data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp1[,2]), sd=sd(grp1[,2])), plot.it = F), grp="0")
-  ecdfdf<-data.frame(ecdfPlot(grp1[,2], plot.it = F), grp="0")
+  cdfdf<-data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp1[,2]), sd=sd(grp1[,2])), plot.it = F), grp="0")
+  ecdfdf<-data.frame(EnvStats::ecdfPlot(grp1[,2], plot.it = F), grp="0")
 
   grptables<-list("0"=grp1)
 
   if (param == 1) {
     grp2<-del[del[,1] %in% names(eventcounts[eventcounts>0]),]
     if (dim(grp2)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp="1+"))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp="1+"))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp="1+"))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp="1+"))
     } else if (dim(grp2)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp="1+"))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp="1+"))
     } else {
       message("No genes map to \"1+\" group!")
     }
@@ -170,10 +192,10 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     grp2name=paste0("1to", ints[2], sep = "")
     grp2<-del[del[,1] %in% names(eventcounts[eventcounts>=1 & eventcounts<=ints[2]]),]
     if (dim (grp2)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp=grp2name))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp=grp2name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
     } else if (dim(grp2)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
     } else {
       message(paste ("No genes map to \"",grp2name,"\" group", sep = ""))
     }
@@ -181,10 +203,10 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     grp3name=paste0(ints[2]+1, "+", sep = "")
     grp3<-del[del[,1] %in% names(eventcounts[eventcounts>ints[2]]),]
     if (dim (grp3)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp3[,2]), sd=sd(grp3[,2])), plot.it = F), grp=grp3name))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp3[,2]), sd=sd(grp3[,2])), plot.it = F), grp=grp3name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
     } else if (dim(grp3)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
     } else {
       message(paste ("No genes map to \"",grp3name,"\" group", sep=""))
     }
@@ -202,10 +224,10 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     grp2name="1"
     grp2<-del[del[,1] %in% names(eventcounts[eventcounts==1]),]
     if (dim (grp2)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp=grp2name))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp2[,2]), sd=sd(grp2[,2])), plot.it = F), grp=grp2name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
     } else if (dim (grp2)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp2[,2], plot.it = F), grp=grp2name))
     } else {
       message("No genes map to \"1\" group")
     }
@@ -213,10 +235,10 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     grp3name=paste0("2to", ints[2], sep="")
     grp3<-del[del[,1] %in% names(eventcounts[eventcounts>1 & eventcounts<=ints[2]]),]
     if (dim (grp3)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp3[,2]), sd=sd(grp3[,2])), plot.it = F), grp=grp3name))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp3[,2]), sd=sd(grp3[,2])), plot.it = F), grp=grp3name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
     } else if (dim (grp3)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp3[,2], plot.it = F), grp=grp3name))
     } else {
       message (paste("No genes map to \"", grp3name, "\" group"))
     }
@@ -224,10 +246,10 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     grp4name=paste0(ints[2]+1, "+", sep="")
     grp4<-del[del[,1] %in% names(eventcounts[eventcounts>ints[2]]),]
     if (dim (grp4)[1]>1) {
-      cdfdf<-rbind(cdfdf, data.frame(cdfPlot(distribution = "norm", param.list = list(mean=mean(grp4[,2]), sd=sd(grp4[,2])), plot.it = F), grp=grp4name))
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp4[,2], plot.it = F), grp=grp4name))
+      cdfdf<-rbind(cdfdf, data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=mean(grp4[,2]), sd=sd(grp4[,2])), plot.it = F), grp=grp4name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp4[,2], plot.it = F), grp=grp4name))
     } else if (dim(grp4)[1]==1) {
-      ecdfdf<-rbind(ecdfdf, data.frame(ecdfPlot(grp4[,2], plot.it = F), grp=grp4name))
+      ecdfdf<-rbind(ecdfdf, data.frame(EnvStats::ecdfPlot(grp4[,2], plot.it = F), grp=grp4name))
     } else {
       message(paste("No genes map to \"", grp4name, "\" group"))
     }
@@ -238,25 +260,39 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
     names(grpcounts)<-names(grptables)
   }
 
-  test<-data.frame(aov(Order.Statistics~grp, data = ecdfdf) %>% tukey_hsd())
+  test<-data.frame(aov(Order.Statistics~grp, data = ecdfdf) %>% rstatix::tukey_hsd())
 
-  setClass("epidecodeR", slots=list(t="data.frame", e="data.frame", eventcounts="numeric", grptables="list", grpcounts="integer",sign.test="data.frame"))
+  #epidecodeR<-setClass("epidecodeR", slots=list(t="data.frame", e="data.frame", eventcounts="numeric", grptables="list", grpcounts="integer",sign.test="data.frame"))
   ro<-new("epidecodeR", t=cdfdf, e=ecdfdf, eventcounts=eventcounts, grptables=grptables, grpcounts=grpcounts, sign.test=test)
   return(ro)
 }
 
 
+#' Title
+#'
+#' @param objdf Data frame of the object from epidecodeR object
+#' @param title Title of the plot
+#' @param lim Limits of x-axis
+#' @param xlab X-axis name
+#' @param ylab Y-axis name
+#' @import ggplot2
+#' @return returns a generic ggplot to be filled by makeplot function
+#'
+#' @examples
+#' \dontrun{
+#' plottingfunc(objdf=obj@t, title=title, lim=lim, xlab=xlab, ylab=ylab)
+#' }
 plottingfunc<-function (objdf, title, lim, xlab, ylab) {
-  p<-ggplot(objdf) +
-    ggtitle(title) +
-    geom_vline(xintercept = 0, color="grey", alpha=0.5, linetype="dashed") +
-    geom_hline(yintercept = 0.5, color="grey", alpha=0.5, linetype="dashed") +
-    xlab(xlab) +
-    ylab(ylab) +
-    xlim(lim) +
-    ylim(0,1) +
-    theme_classic() +
-    theme(plot.title = element_text(hjust = 0.5))
+  p<-ggplot2::ggplot(objdf) +
+    ggplot2::ggtitle(title) +
+    ggplot2::geom_vline(xintercept = 0, color="grey", alpha=0.5, linetype="dashed") +
+    ggplot2::geom_hline(yintercept = 0.5, color="grey", alpha=0.5, linetype="dashed") +
+    ggplot2::xlab(xlab) +
+    ggplot2::ylab(ylab) +
+    ggplot2::xlim(lim) +
+    ggplot2::ylim(0,1) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
   return(p)
 }
 
@@ -268,18 +304,14 @@ plottingfunc<-function (objdf, title, lim, xlab, ylab) {
 #' @param title char - Title of the plot
 #' @param xlab char - X-axis label
 #' @param ylab char - Y-axis label
-#'
+#' @import ggplot2
 #' @return A CDF plot
 #' @export
 #'
-#' @examples p<-makeplot(epiobj, lim = c(-2,2), title = "H3K27ac", xlab = "siSDS3/WT")
-#' p
-#' OR
-#' p<-makeplot(epiobj, type = 't', lim = c(-2,2),  title = "H3K27ac", xlab = "siSDS3/WT")
-#' p
-#' p<-makeplot(epiobj, lim=c(-7,7), type='e')
-#' p
-
+#' @examples events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
+#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
+#' p<-makeplot(epiobj, lim = c(-2,2), title = "H3K27ac", xlab = "siSDS3/WT")
 makeplot<-function (obj, type, lim, title, xlab, ylab) {
   if (missing(obj)) {
     message ("No epidecodeR object provided!")
@@ -305,28 +337,22 @@ makeplot<-function (obj, type, lim, title, xlab, ylab) {
 
   for (i in 1:length(obj@grpcounts)) {
     if (obj@grpcounts[i]==0) {
-      pt<-pt+geom_blank(data=data.frame(cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F),
-                    grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
-      pe<-pe+geom_blank(data=data.frame(cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F),
-                                        grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
-      pb<-pb+geom_blank(data=data.frame(cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F),
-                                        grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
+      pt<-pt+ggplot2::geom_blank(data=data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F), grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
+      pe<-pe+ggplot2::geom_blank(data=data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F), grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
+      pb<-pb+ggplot2::geom_blank(data=data.frame(EnvStats::cdfPlot(distribution = "norm", param.list = list(mean=0, sd=1), plot.it = F), grp=names(obj@grpcounts[i])), aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
     } else if (obj@grpcounts[i]==1) {
       message(paste("Theoretical plot for ", names(obj@grpcounts[i]), " group not included since only one gene found to belong to the group!", sep = ""))
     }
   }
-  pt<-pt+geom_line(aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
-  pt<-pt+scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts),
-                          labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
-  pe<-pe+geom_point(aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp), size=1) +
-         geom_line(aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp))
-  pe<-pe+scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts),
-                              labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
-  pb<-pb+geom_line(data=obj@t, aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
-  pb<-pb+geom_point(data=obj@e, aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp),size=1) +
-         geom_line(data=obj@e, aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp), linetype="dashed")
-  pb<-pb+scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts),
-                              labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
+  pt<-pt+ggplot2::geom_line(aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
+  pt<-pt+ggplot2::scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts), labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
+  pe<-pe+ggplot2::geom_point(aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp), size=1) +
+         ggplot2::geom_line(aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp))
+  pe<-pe+ggplot2::scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts), labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
+  pb<-pb+ggplot2::geom_line(data=obj@t, aes(Quantiles, Cumulative.Probabilities, group=grp, color=grp))
+  pb<-pb+ggplot2::geom_point(data=obj@e, aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp),size=1) +
+         ggplot2::geom_line(data=obj@e, aes(Order.Statistics, Cumulative.Probabilities, group=grp, color=grp), linetype="dashed")
+  pb<-pb+ggplot2::scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts), labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE)
   if (type == "t") {
     p<-pt
   } else if (type == "e") {
@@ -337,18 +363,22 @@ makeplot<-function (obj, type, lim, title, xlab, ylab) {
   return(p)
 }
 
+
 #' Generates boxplot of distribution of log2FC of dysregulated genes and adjusted P value of signficance test of difference in mean log2FC between groups computed using one-way ANOVA test
 #'
 #' @param obj epidecodeR object - epidecodeR object generated using epidecodeR function
 #' @param title char - Title of the plot
 #' @param ylab char - Y-axis label
+#' @import ggplot2
 #'
 #' @return Boxplot of distribution of log2FC of dysregulated genes between groups
 #' @export
 #'
-#' @examples pt<-plot.test(epiobj, title = "H3K27ac", ylab = "siSDS3/WT")
-#' pt
-plot.test<-function (obj, title, ylab) {
+#' @examples events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
+#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
+#' pt<-plot_test(epiobj, title = "H3K27ac", ylab = "siSDS3/WT")
+plot_test<-function (obj, title, ylab) {
 
     if (missing(title) || is.null(title)) {
       title = ""
@@ -356,20 +386,19 @@ plot.test<-function (obj, title, ylab) {
     if (missing(ylab) || is.null(ylab)) {
       ylab="Log2FoldChange"
     }
-    bplot<-ggplot()+
-    ggtitle(title) +
-    xlab("Groups") +
-    ylab(ylab) +
-    theme_classic()
+    bplot<-ggplot2::ggplot()+
+    ggplot2::ggtitle(title) +
+    ggplot2::xlab("Groups") +
+    ggplot2::ylab(ylab) +
+    ggplot2::theme_classic()
 
   over<-NULL
 
   for (i in 1:length(obj@grpcounts)) {
     if (obj@grpcounts[i]==0) {
-      bplot<-bplot+geom_blank(data=data.frame(x=rnorm(100), grp=names(obj@grpcounts[i])), aes(grp, x, group=grp, color=grp))
+      bplot<-bplot+ggplot2::geom_blank(data=data.frame(x=rnorm(100), grp=names(obj@grpcounts[i])), aes(grp, x, group=grp, color=grp))
     } else {
-      bplot<-bplot+geom_boxplot(data=(subset(obj@e, obj@e$grp %in% names(obj@grpcounts[i]))), aes(grp, Order.Statistics, group=grp, color=grp),
-                                width=0.4)
+      bplot<-bplot+ggplot2::geom_boxplot(data=(subset(obj@e, obj@e$grp %in% names(obj@grpcounts[i]))), aes(grp, Order.Statistics, group=grp, color=grp), width=0.4)
     }
   }
 
@@ -379,19 +408,13 @@ plot.test<-function (obj, title, ylab) {
 
   if (length (unique(obj@sign.test$p.adj.signif))==1 && unique(obj@sign.test$p.adj.signif)=="ns") {
     bplot<-bplot +
-      scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts),
-                           labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE) +
-      theme(plot.title = element_text(hjust = 0.5),
-            axis.text=element_text(size=12),
-            axis.title=element_text(size=14,face="bold"))
+      ggplot2::scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts), labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text=ggplot2::element_text(size=12), axis.title=ggplot2::element_text(size=14,face="bold"))
   } else {
     bplot<-bplot +
-      scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts),
-                           labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE) +
-      stat_pvalue_manual(obj@sign.test, hide.ns = T, label = "p.adj", y.position = max(obj@e$Order.Statistics)*1.2, step.increase = 0.2) +
-      theme(plot.title = element_text(hjust = 0.5),
-            axis.text=element_text(size=12),
-            axis.title=element_text(size=14,face="bold"))
+      ggplot2::scale_color_discrete(name="Groups (genes)", breaks=names(obj@grpcounts), labels=paste(names(obj@grpcounts)," (",obj@grpcounts,")", sep = "" ), drop=FALSE) +
+      ggpubr::stat_pvalue_manual(obj@sign.test, hide.ns = T, label = "p.adj", y.position = max(obj@e$Order.Statistics)*1.2, step.increase = 0.2) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5), axis.text=ggplot2::element_text(size=12), axis.title=ggplot2::element_text(size=14,face="bold"))
   }
 
 
