@@ -22,9 +22,9 @@ Dependencies:<br/>
   e. rstatix<br/>
   f. ggpubr<br/>
 
-if (!require("BiocManager")) {
-install.packages(c("BiocManager", "devtools"))
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;library(BiocManager)
+if (!require("BiocManager")) {<br/>
+install.packages(c("BiocManager"))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;library(BiocManager)<br/>
 }
 <br/>
 if (!require("rtracklayer")){<br/>
