@@ -28,6 +28,6 @@ Generate CDF plot using epidecodeR object generated using epidecodeR function
 \examples{
 events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
 deg<-system.file("extdata", "deg.txt", package="epidecodeR")
-epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
+epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,4))
 makeplot(epiobj, lim = c(-10,10), title = "m6A mediated dysregulation after FTO inhibitor treatment", xlab = "log2FC")
 }
