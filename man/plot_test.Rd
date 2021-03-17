@@ -22,6 +22,6 @@ Generates boxplot of distribution of log2FC of dysregulated genes and adjusted P
 \examples{
 events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
 deg<-system.file("extdata", "deg.txt", package="epidecodeR")
-epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))
+epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,4))
 plot_test(epiobj, title = "m6A mediated dysregulation after FTO inhibitor treatment", ylab = "log2FC")
 }
