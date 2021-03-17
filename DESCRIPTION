@@ -1,7 +1,7 @@
 Package: epidecodeR
 Type: Package
 Title: Analysis of dysregulation of genes by DNA and RNA epigenetic modifications and visualization
-Version: 0.1.0
+Version: 0.99.1
 Authors@R: c(person("Kandarp", "Joshi", email = "kandarpbioinfo@gmail.com",
                   role = c("aut", "cre")),
              person("Dan", "Ohtan Wang", email = "ohtan@riken.jp",
