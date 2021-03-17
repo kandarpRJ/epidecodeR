@@ -14,25 +14,25 @@ Install Rstudio for your OS (https://rstudio.com/products/rstudio/)
 
 3) Install bioconductor and devtools packages required for installing epidecodeR and its dependencies # epidecodeR depends on following packages, which must be installed prior to installing epidecodeR. NOTE: except rtracklayer and GenomicRanges other packages will install automatically during installation of epidecodeR.
 
-Dependencies:
-a. EnvStats
-b. ggplot2
-c. rtracklayer
-d. GenomicRanges
-e. rstatix
-f. ggpubr
+Dependencies:<br/>
+a. EnvStats<br/>
+b. ggplot2<br/>
+c. rtracklayer<br/>
+d. GenomicRanges<br/>
+e. rstatix<br/>
+f. ggpubr<br/>
 
-if(!require("BiocManager")) {<br/>
+if (!require("BiocManager")) {<br/>
   install.packages(c("BiocManager", "devtools"))<br/>
   library(BiocManager)<br/>
   library(devtools)<br/>
 }
 <br/>
-if(!require("rtracklayer")){<br/>
+if (!require("rtracklayer")){<br/>
   BiocManager::install(c("rtracklayer", "GenomicRanges"))<br/>
 }
 <br/>
 4) Install epidecodeR from github (https://github.com/kandarpRJ/epidecodeR)
 
-install_github("kandarpRJ/epidecodeR")
+install_github("kandarpRJ/epidecodeR")<br/>
 library (epidecodeR)
