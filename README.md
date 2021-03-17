@@ -12,7 +12,8 @@ Choose the CRAN mirror nearest to you (https://cran.r-project.org/mirrors.html)
 
 Install Rstudio for your OS (https://rstudio.com/products/rstudio/)
 
-### 3) Install bioconductor and devtools packages required for installing epidecodeR and its dependencies # epidecodeR depends on following packages, which must be installed prior to installing epidecodeR. NOTE: except rtracklayer and GenomicRanges other packages will install automatically during installation of epidecodeR.
+### 3) Install bioconductor and devtools packages required for installing epidecodeR and its dependencies 
+#epidecodeR depends on following packages, which must be installed prior to installing epidecodeR. NOTE: except rtracklayer and GenomicRanges other packages will install automatically during installation of epidecodeR.
 
 #### Dependencies:<br/>
   a. EnvStats<br/>
