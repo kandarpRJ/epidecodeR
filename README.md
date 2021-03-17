@@ -49,7 +49,11 @@ library (epidecodeR)
 ## Examples
 
 `events<-system.file("extdata", "con_peak.bed", package="epidecodeR")`
+
 `deg<-system.file("extdata", "deg.txt", package="epidecodeR")`
+
 `epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,5))`
+
 `makeplot(epiobj, lim = c(-2,2), title = "m6A mediated dysregulation after FTO inhibitor treatment", xlab = "log2FC")`
+
 `plot_test(epiobj, title = "m6A mediated dysregulation after FTO inhibitor treatment", ylab = "log2FC")`
