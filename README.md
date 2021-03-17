@@ -23,14 +23,14 @@ e. rstatix
 f. ggpubr
 
 if(!require("BiocManager")) {<br/>
-  install.packages(c("BiocManager", "devtools"))<br/>
-  library(BiocManager)\n
+&nbsp&nbspinstall.packages(c("BiocManager", "devtools"))<br/>
+&nbsp&nbsplibrary(BiocManager)<br/>
 }
-
-if(!require("rtracklayer")){\n
-  BiocManager::install(c("rtracklayer", "GenomicRanges"))\n
-}\n
-
+<br/>
+if(!require("rtracklayer")){<br/>
+&nbsp&nbspBiocManager::install(c("rtracklayer", "GenomicRanges"))<br/>
+}
+<br/>
 4) Install epidecodeR from github (https://github.com/kandarpRJ/epidecodeR)
 
 library(devtools)
