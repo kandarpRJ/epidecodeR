@@ -22,8 +22,8 @@ d. GenomicRanges
 e. rstatix
 f. ggpubr
 
-if(!require("BiocManager")) {\n
-  install.packages(c("BiocManager", "devtools"))\n
+if(!require("BiocManager")) {<br/>
+  install.packages(c("BiocManager", "devtools"))<br/>
   library(BiocManager)\n
 }
 
