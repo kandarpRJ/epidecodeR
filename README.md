@@ -22,11 +22,11 @@ Dependencies:<br/>
   e. rstatix<br/>
   f. ggpubr<br/>
 
-if (!require("BiocManager")) {<br/>
+code (if (!require("BiocManager")) {<br/>
 	install.packages(c("BiocManager", "devtools"))<br/>
 	library(BiocManager)<br/>
 	library(devtools)<br/>
-}
+})
 <br/>
 if (!require("rtracklayer")){<br/>
 	BiocManager::install(c("rtracklayer", "GenomicRanges"))<br/>
