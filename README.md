@@ -46,7 +46,7 @@ if (!require("devtools")) {<br/>
 install_github("kandarpRJ/epidecodeR")<br/>
 library (epidecodeR)
 
-## Examples
+## Toy example
 
 `events<-system.file("extdata", "con_peak.bed", package="epidecodeR")`
 
