@@ -4,9 +4,6 @@
 \name{epidecodeR-class}
 \alias{epidecodeR-class}
 \title{epidecodeR object - a S4 class object}
-\value{
-
-}
 \description{
 epidecodeR object - a S4 class object
 }
