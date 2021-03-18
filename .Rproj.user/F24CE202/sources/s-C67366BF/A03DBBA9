@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1615960579545.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1854470317",
+    "id" : "A03DBBA9",
+    "lastKnownWriteTime" : 1616028853,
+    "last_content_update" : 1616028853975,
+    "path" : "~/epidecodeR/vignettes/epidecodeR.Rmd",
+    "project_path" : "vignettes/epidecodeR.Rmd",
+    "properties" : {
+        "cursorPosition" : "218,0",
+        "scrollLine" : "196"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

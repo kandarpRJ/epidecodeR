@@ -1,0 +1,225 @@
+---
+title: "epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction
+
+Recent technological advances in chemical modification detection on DNA and RNA using high throughput sequencing have generated a plethora of epigenomic and epitranscriptomic datasets. However, functional characterization of chemical modifications on DNA and RNA still remain largely unexplored. Generally, in silico methods rely on identifying location and quantitative differential analysis of the modifications. 
+
+The number of epigenomic/epitranscriptomic modification events associated with the gene can provide the degree of modification/accessibility associated with the gene of interest, which in turn plays a crucial role in determining the levels of differential gene expression. Data integration methods can combine both these layers and provide information about the degree of events occurring and its influence on the differential gene expression, ribosome occupancy or protein translation. We made an assumption that if an epi-mark is functional for up- or down-regulation of expression in a particular context, a gene with the epi-mark is more likely to be impacted for its expression. If a gene has more marked sites thus higher degree of modification would be impacted more, which can be quantified as differential RNA expression, ribosome occupancy, or protein abundance obtained from RNA-seq, Ribo-seq, or proteomics datasets
+
+Here we present epidecodeR, an R package capable of integrating chemical modification data generated from a host of epigenomic or epitranscriptomic techniques such as ChIP-seq, ATAC-seq, m6A-seq, etc. and dysregulated gene lists in the form of differential gene expression, ribosome occupancy or differential protein translation and identify impact of dysregulation of genes caused due to varying degrees of chemical modifications associated with the genes. epidecodeR generates cumulative distribution function (CDF) plots showing shifts in trend of overall log2FC between genes divided into groups based on the degree of modification associated with the genes. The tool also tests for significance of difference in log2FC between groups of genes.
+
+
+## Implementation steps
+
+1. Calculate sum of all events associated with each gene
+
+2. Group genes into user defined groups based on degree (count) of events per gene
+
+3. Calculate theoretical and empirical cumulative probabilities (quantiles) of log2FC per group
+
+4. Perform ANOVA one-way test of significance in difference of mean between groups 
+
+5. Plot CDF plots and boxplot with significance testing results
+
+```{r, echo=FALSE, out.width="90%"}
+knitr::include_graphics("steps.png")
+```
+
+
+
+## For the impatient
+
+### Installation
+
+```{r, eval=FALSE}
+if (!require("BiocManager")) {
+install.packages("BiocManager")
+library(BiocManager)
+}
+if (!require("rtracklayer")){
+BiocManager::install("rtracklayer")
+}
+if (!require("GenomicRanges")){
+BiocManager::install("GenomicRanges")
+}
+if (!require("devtools")) {
+install.packages("devtools")
+library(devtools)
+}
+
+install_github("kandarpRJ/epidecodeR")
+```
+```{r setup}
+library(epidecodeR)
+```
+
+## Run example
+```{r}
+events<-system.file("extdata", "NOMO-1_ref_peaks.bed", package="epidecodeR")
+deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
+epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,4))
+```
+```{r, fig.width=6, fig.height=6}
+makeplot(epiobj, lim = c(-10,10), title = "m6A mediated dysregulation after FTO inhibitor treatment", xlab = "log2FC")
+```
+```{r, fig.width=6, fig.height=6}
+plot_test(epiobj, title = "m6A mediated dysregulation after FTO inhibitor treatment", ylab = "log2FC")
+```
+
+## Details
+
+
+### Inputs
+
+epidecodeR expects two mandatory inputs: 
+
+1) reference events file and 
+2) dysregulated gene list
+
+Dysregulated genes are divided into groups based on degree of events associated with  the respective gene as determined using events file
+
+Event files consist of reference DNA/RNA modification's genomic positions as a bed file or counts of events (modifications) per gene
+
+Reference modifications are generally modifications identified on wild type cell line or normal (healthy) organism using high throughput sequencing techniques such as ChIP-seq, ATAC-seq, m6A-seq, etc. 
+
+Example input files look like this:
+
+Input file as event counts per gene looks like this:
+
+```{r, echo=FALSE}
+events<-system.file("extdata", "eventcounts.txt", package="epidecodeR")
+events_df<-read.table(events, header = TRUE, row.names = NULL, stringsAsFactors = FALSE, sep = "\t", fill = TRUE)
+```
+```{r}
+head (events_df)
+```
+
+Events as genomic coordinates in BED file format looks like this:
+
+```{r, echo=FALSE}
+events<-system.file("extdata", "NOMO-1_ref_peaks.bed", package="epidecodeR")
+peaks_df<-read.table(events, header = FALSE, row.names = NULL, stringsAsFactors = FALSE, sep = "\t", fill = TRUE)
+```
+```{r}
+head (peaks_df)
+```
+
+BED files must have a minimum three columns i.e. chr, start and end. If ID of the coordinate is provided it must be in the fourth column of BED file
+
+##### Important: ID of events file and dysregulated gene list must be same. e.g. If ID type in event counts file is gene_id, dysregulated gene list also must have ID type gene_id for successful mapping and groups assignment. 
+[Note: Version of the gene_id must also match e.g. ENSG00000228794.9 & ENSG00000228794.10 not allowed]
+
+In case ID type is not provided as fourth column of the BED file, epidecodeR is capable of assigning ID type to coordinates by overlapping with "gene" level coordinates of the organism using reference genome annotation GTF file.
+Please provide appropriate genome annotation file in GTF format and ID type compatible with ID type of dysregulated gene list. (*.gtf.gz are accepted)
+
+#### usage
+epidecodeR(events, deg, gtf_file, id_type, boundaries, pval, param, ints)
+
+#### arguments
+Parameter | Explanation
+---|--------------
+events | char - Name of events file. This can be a txt file with two columns: 1) id & 2) counts of events in the gene. Optionally, users can provide a 3+ column .bed file. The count of events per gene in fourth column are calculated to determine degree of events per gene; Default NULL
+deg | char - Name of dysregulated genes file. This file is a three column file consisting of column 1: id (Make sure ID type matches between events and deg); column 2) log2foldchange; 3) P value of signficance of fold change; Default NULL
+gtf_file | char - Name of compressed gtf file. Use gtf file if .bed file used as events input and users wish to count events per gene from bed file by comparing coordinates in bed to gene coordinates in gtf to assign events to genes. Note: For coordinates overlapping to multiple features in gtf, only one feature is assigned to the coordinate, which is choosen arbitrarily; Default NULL
+id_type | char - Name of id type used to count events per gene. ID type must match between events and DEG file. For example, if 'gene_name' is used as ID type in DEG file, same ID type must be used to assign coordinates to genes. In case the DEG list contains two ID types merged e.g. 'ENSMUSG00000035299.16|Mid1' users can give merge as parameter for id_type; Default gene_name
+boundaries | numeric - Number of base pairs to include within boundries of genes for event counting. This option adds # of bases to start and end of coordinates of the genes to include promotor regions within gene for overlap with bed files and event counting; Default 0
+pval | numeric - P value cut-off of dysregulated genes in DEG file to be considered for distribution into groups. Default: 0.05}
+param | numeric - Defines the number and size of groups of dysregulated genes. Allowed values are param = 1 [0 events: 1+ events]; param = 2 [0 events: 1-N event: (N+1)+ event]; param = 3 [0 events; 1 event; 2-N events; (N+1)+ events]; N is user defined limit of the group provided using ints parameter
+ints | vector - A vector of intervals defining limits of the degree of group for param = 2 and param = 3. e.g. c(1, 4) or c(2, 5): For param = 2, Default :c(1,4) and for param = 3, Default: c(2,5)
+
+
+### Output
+
+epidecodeR function returns an epidecodeR object of S4 class, which contains theoretical and empirical cumulative probabilities of the quantiles as well as group information and set of genes belonging to each group. The object also contains result of one-way ANOVA significance test of difference in means of log2FC between groups following Tukey's test between every set of two groups. 
+
+Theoretical cumulative probabilities
+
+```{r}
+head (epiobj@t)
+```
+
+Empirical cumulative probabilities
+
+```{r}
+head (epiobj@e)
+```
+
+Count of genes per group
+
+```{r}
+head (epiobj@grpcounts)
+```
+
+Access genes belonging to particular group using group name like so
+
+```{r}
+head (epiobj@grptables$'0')
+head (epiobj@grptables$'1')
+head (epiobj@grptables$'2to4')
+head (epiobj@grptables$'5+')
+```
+
+### Plots
+
+#### makeplot
+
+This function creates CDF plots using epidecodeR object generated above.
+
+```{r, fig.width=6, fig.height=6}
+makeplot(epiobj, lim = c(-10,10), title = "m6A mediated dysregulation after FTO inhibitor treatment", xlab = "log2FC")
+```
+
+### usage
+makeplot(obj, type, lim, title, xlab, ylab)
+
+
+### arguments
+Parameter | Explanation
+---|--------------
+obj	| (epidecodeR object) epidecodeR object generated using epidecodeR function
+type | (char) Type of CDF plot to generate; Accepted values 't': theoretical CDF plot; 'e': empirical CDF plot; 'both': Creates both theoretical and empirical plots. Default: both
+lim	| (vector) Upper and lower limits of log2FC for X-axis
+title	| (char) Title of the plot
+xlab	| (char) X-axis label
+ylab	| (char) Y-axis label
+
+
+#### plot_test
+
+This function creates boxplots of distribution of log2FC in individual groups using epidecodeR object generated above.
+
+```{r, fig.width=6, fig.height=6}
+plot_test(epiobj, title = "m6A mediated dysregulation after FTO inhibitor treatment", ylab = "log2FC")
+```
+
+### usage
+plot_test(obj, title, ylab)
+
+
+### arguments
+Parameter | Explanation
+---|--------------
+obj	| (epidecodeR object) epidecodeR object generated using epidecodeR function
+title	| (char) Title of the plot
+ylab	| (char) Y-axis label
+
+
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
