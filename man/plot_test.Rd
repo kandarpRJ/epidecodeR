@@ -9,9 +9,9 @@ plot_test(obj, title, ylab)
 \arguments{
 \item{obj}{epidecodeR object - epidecodeR object generated using epidecodeR function}
 
-\item{title}{char - Title of the plot}
+\item{title}{Title of the plot}
 
-\item{ylab}{char - Y-axis label}
+\item{ylab}{Y-axis label}
 }
 \value{
 Boxplot of distribution of log2FC of dysregulated genes between groups
@@ -20,8 +20,8 @@ Boxplot of distribution of log2FC of dysregulated genes between groups
 Generates boxplot of distribution of log2FC of dysregulated genes and adjusted P value of signficance test of difference in mean log2FC between groups computed using one-way ANOVA test
 }
 \examples{
-events<-system.file("extdata","con_peak.bed",package="epidecodeR")
-deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+events<-system.file("extdata","NOMO-1_ref_peaks.bed",package="epidecodeR")
+deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
 epiobj<-epidecodeR(events=events,deg=deg,pval=0.05,param=3,ints=c(2,4))
 plot_test(epiobj,title="log2FC distribution based on m6A degree",ylab="log2FC")
 }

@@ -16,14 +16,14 @@ setClass("epidecodeR", slots=list(t="data.frame", e="data.frame", eventcounts="n
 
 #' Analysis function for generating epidecodeR object. This function distributes dysregulated genes into user defined groups and calculates cumulative probabilities and ANOVA test statistics for significance testing in difference of log2FC means between groups of dysregulated genes
 #'
-#' @param events char - Name of events file. This can be a txt file with two columns: 1) id & 2) counts of events in the gene. Optionally, users can provide a 3+ column .bed file. The count of events per gene in fourth column are calculated to determine degree of events per gene; Default NULL
-#' @param deg char - Name of dysregulated genes file. This file is a three column file consisting of column 1: id (Make sure ID type matches between events and deg); column 2) log2foldchange; 3) P value of signficance of fold change; Default NULL
-#' @param gtf_file char - Name of compressed gtf file. Use gtf file if .bed file used as events input and users wish to count events per gene from bed file by comparing coordinates in bed to gene coordinates in gtf to assign events to genes. Note: For coordinates overlapping to multiple features in gtf, only one feature is assigned to the coordinate, which is choosen arbitrarily; Default NULL
-#' @param id_type char - Name of id type used to count events per gene. ID type must match between events and DEG file. For example, if 'gene_name' is used as ID type in DEG file, same ID type must be used to assign coordinates to genes. In case the DEG list contains two ID types merged e.g. 'ENSMUSG00000035299.16|Mid1' users can give merge as parameter for id_type; Default gene_name
-#' @param boundaries numeric - Number of base pairs to include within boundries of genes for event counting. This option adds # of bases to start and end of coordinates of the genes to include promotor regions within gene for overlap with bed files and event counting; Default 0
-#' @param pval numeric - P value cut-off of dysregulated genes in DEG file to be considered for distribution into groups. Default: 0.05
-#' @param param numeric - Defines the number and size of groups of dysregulated genes. Allowed values are param = 1 [0 events: 1+ events]; param = 2 [0 events: 1-N event: (N+1)+ event]; param = 3 [0 events; 1 event; 2-N events; (N+1)+ events]; N is user defined limit of the group provided using ints parameter
-#' @param ints vector - A vector of intervals defining limits of the degree of group for param = 2 and param = 3. e.g. c(1, 4) or c(2, 5): For param = 2, Default :c(1,4) and for param = 3, Default: c(2,5)
+#' @param events (char) - Name of events file. This can be a txt file with two columns: 1) id & 2) counts of events in the gene. Optionally, users can provide a 3+ column .bed file. The count of events per gene in fourth column are calculated to determine degree of events per gene; Default NULL
+#' @param deg (char) - Name of dysregulated genes file. This file is a three column file consisting of column 1: id (Make sure ID type matches between events and deg); column 2) log2foldchange; 3) P value of signficance of fold change; Default NULL
+#' @param gtf_file (char) - Name of compressed gtf file. Use gtf file if .bed file used as events input and users wish to count events per gene from bed file by comparing coordinates in bed to gene coordinates in gtf to assign events to genes. Note: For coordinates overlapping to multiple features in gtf, only one feature is assigned to the coordinate, which is choosen arbitrarily; Default NULL
+#' @param id_type (char) - Name of id type used to count events per gene. ID type must match between events and DEG file. For example, if 'gene_name' is used as ID type in DEG file, same ID type must be used to assign coordinates to genes. In case the DEG list contains two ID types merged e.g. 'ENSMUSG00000035299.16|Mid1' users can give merge as parameter for id_type; Default gene_name
+#' @param boundaries (numeric) - Number of base pairs to include within boundries of genes for event counting. This option adds # of bases to start and end of coordinates of the genes to include promotor regions within gene for overlap with bed files and event counting; Default 0
+#' @param pval (numeric) - P value cut-off of dysregulated genes in DEG file to be considered for distribution into groups. Default: 0.05
+#' @param param (numeric) - Defines the number and size of groups of dysregulated genes. Allowed values are param = 1 [0 events: 1+ events]; param = 2 [0 events: 1-N event: (N+1)+ event]; param = 3 [0 events; 1 event; 2-N events; (N+1)+ events]; N is user defined limit of the group provided using ints parameter
+#' @param ints (vector) - A vector of intervals defining limits of the degree of group for param = 2 and param = 3. e.g. c(1, 4) or c(2, 5): For param = 2, Default :c(1,4) and for param = 3, Default: c(2,5)
 #' @import dplyr
 #' @importFrom methods new
 #' @importFrom methods setClass
@@ -36,8 +36,8 @@ setClass("epidecodeR", slots=list(t="data.frame", e="data.frame", eventcounts="n
 #' @export
 #' @exportClass epidecodeR
 #' @examples
-#' events<-system.file("extdata", "con_peak.bed", package="epidecodeR")
-#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' events<-system.file("extdata", "NOMO-1_ref_peaks.bed", package="epidecodeR")
+#' deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
 #' epiobj<-epidecodeR(events=events,deg=deg,pval=0.05,param=3,ints=c(2,4))
 epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, ints) {
 
@@ -270,8 +270,8 @@ plottingfunc<-function (objdf, title, lim, xlab, ylab) {
 #' @return A CDF plot
 #' @export
 #'
-#' @examples events<-system.file("extdata","con_peak.bed", package="epidecodeR")
-#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' @examples events<-system.file("extdata","NOMO-1_ref_peaks.bed", package="epidecodeR")
+#' deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
 #' epiobj<-epidecodeR(events=events,deg=deg,pval=0.05,param=3,ints=c(2,4))
 #' makeplot(epiobj, lim = c(-10,10), xlab = "log2FC")
 makeplot<-function (obj, type, lim, title, xlab, ylab) {
@@ -330,15 +330,15 @@ makeplot<-function (obj, type, lim, title, xlab, ylab) {
 #' Generates boxplot of distribution of log2FC of dysregulated genes and adjusted P value of signficance test of difference in mean log2FC between groups computed using one-way ANOVA test
 #'
 #' @param obj epidecodeR object - epidecodeR object generated using epidecodeR function
-#' @param title char - Title of the plot
-#' @param ylab char - Y-axis label
+#' @param title Title of the plot
+#' @param ylab Y-axis label
 #' @import ggplot2
 #'
 #' @return Boxplot of distribution of log2FC of dysregulated genes between groups
 #' @export
 #'
-#' @examples events<-system.file("extdata","con_peak.bed",package="epidecodeR")
-#' deg<-system.file("extdata", "deg.txt", package="epidecodeR")
+#' @examples events<-system.file("extdata","NOMO-1_ref_peaks.bed",package="epidecodeR")
+#' deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
 #' epiobj<-epidecodeR(events=events,deg=deg,pval=0.05,param=3,ints=c(2,4))
 #' plot_test(epiobj,title="log2FC distribution based on m6A degree",ylab="log2FC")
 plot_test<-function (obj, title, ylab) {
