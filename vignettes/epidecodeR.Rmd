@@ -1,6 +1,8 @@
 ---
 title: "epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    toc: true
 vignette: >
   %\VignetteIndexEntry{epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation}
   %\VignetteEngine{knitr::rmarkdown}
