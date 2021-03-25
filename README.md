@@ -37,9 +37,9 @@ library (epidecodeR)
 
 ## Toy example
 
-`events<-system.file("extdata", "con_peak.bed", package="epidecodeR")`
+`events<-system.file("extdata", "NOMO-1_ref_peaks.bed", package="epidecodeR")`
 
-`deg<-system.file("extdata", "deg.txt", package="epidecodeR")`
+`deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")`
 
 `epiobj <- epidecodeR(events = events, deg = deg, pval=0.05, param = 3, ints=c(2,4))`
 
