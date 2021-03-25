@@ -47,22 +47,9 @@ knitr::include_graphics("steps.png")
 ### Installation
 
 ```{r, eval=FALSE}
-if (!require("BiocManager")) {
-install.packages("BiocManager")
-library(BiocManager)
-}
-if (!require("rtracklayer")){
-BiocManager::install("rtracklayer")
-}
-if (!require("GenomicRanges")){
-BiocManager::install("GenomicRanges")
-}
-if (!require("devtools")) {
-install.packages("devtools")
-library(devtools)
-}
-
-install_github("kandarpRJ/epidecodeR")
+if(!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("epidecodeR")
 ```
 ```{r setup}
 library(epidecodeR)
@@ -101,7 +88,7 @@ Example input files look like this:
 
 Input file as event counts per gene looks like this:
 
-```{r, echo=FALSE}
+```{r}
 events<-system.file("extdata", "eventcounts.txt", package="epidecodeR")
 events_df<-read.table(events, header = TRUE, row.names = NULL, stringsAsFactors = FALSE, sep = "\t", fill = TRUE)
 ```
@@ -111,7 +98,7 @@ head (events_df)
 
 Events as genomic coordinates in BED file format looks like this:
 
-```{r, echo=FALSE}
+```{r}
 events<-system.file("extdata", "NOMO-1_ref_peaks.bed", package="epidecodeR")
 peaks_df<-read.table(events, header = FALSE, row.names = NULL, stringsAsFactors = FALSE, sep = "\t", fill = TRUE)
 ```
@@ -150,28 +137,29 @@ epidecodeR function returns an epidecodeR object of S4 class, which contains the
 Theoretical cumulative probabilities
 
 ```{r}
-head (epiobj@t)
+head (get_theoretical_table(epiobj))
 ```
 
 Empirical cumulative probabilities
 
 ```{r}
-head (epiobj@e)
+head (get_empirical_table(epiobj))
 ```
 
 Count of genes per group
 
 ```{r}
-head (epiobj@grpcounts)
+head (get_grpcounts(epiobj))
 ```
 
 Access genes belonging to particular group using group name like so
 
 ```{r}
-head (epiobj@grptables$'0')
-head (epiobj@grptables$'1')
-head (epiobj@grptables$'2to4')
-head (epiobj@grptables$'5+')
+grptables_list<-get_grptables(epiobj)
+head (grptables_list$'0')
+head (grptables_list$'1')
+head (grptables_list$'2to4')
+head (grptables_list$'5+')
 ```
 
 ### Plots
@@ -218,8 +206,6 @@ obj	| (epidecodeR object) epidecodeR object generated using epidecodeR function
 title	| (char) Title of the plot
 ylab	| (char) Y-axis label
 
-
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+```{r}
+sessionInfo()
+```

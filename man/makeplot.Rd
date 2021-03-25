@@ -9,7 +9,7 @@ makeplot(obj, type, lim, title, xlab, ylab)
 \arguments{
 \item{obj}{epidecodeR object - epidecodeR object generated using epidecodeR function}
 
-\item{type}{char - Type of CDF plot to generate; Accepted values 't': theoretical CDF plot; 'e': empirical CDF plot; 'both': Creates both theoretical and empirical plots.  Default: both}
+\item{type}{char - Type of CDF plot to generate; Accepted values 't': theoretical CDF plot; 'e': empirical CDF plot; 'both': Creates both theoretical and empirical plots.    Default: both}
 
 \item{lim}{vector - Upper and lower limits of log2FC for X-axis}
 

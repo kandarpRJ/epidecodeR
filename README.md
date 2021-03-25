@@ -29,23 +29,10 @@ if (!require("BiocManager")) {<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;library(BiocManager)<br/>
 }
 <br/>
-if (!require("rtracklayer")){<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BiocManager::install("rtracklayer")<br/>
-}
-<br/>
-if (!require("GenomicRanges")){<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BiocManager::install("GenomicRanges")<br/>
-}
-<br/>
-if (!require("devtools")) {<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;install.packages("devtools")<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;library(devtools)<br/>
-}
-<br/>
 
 ### 4) Install epidecodeR from github (https://github.com/kandarpRJ/epidecodeR)
 
-install_github("kandarpRJ/epidecodeR")<br/>
+BiocManager::install("epidecodeR")<br/>
 library (epidecodeR)
 
 ## Toy example

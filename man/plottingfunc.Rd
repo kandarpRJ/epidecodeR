@@ -25,6 +25,11 @@ Title
 }
 \examples{
 \dontrun{
-plottingfunc(objdf=obj@t, title=title, lim=lim, xlab=xlab, ylab=ylab)
+events<-system.file("extdata","NOMO-1_ref_peaks.bed", package="epidecodeR")
+deg<-system.file("extdata", "FTOi.txt", package="epidecodeR")
+epiobj<-epidecodeR(events=events,deg=deg,pval=0.05,param=3,ints=c(2,4))
+plottingfunc(objdf=get_theoretical_table(epiobj), title="title", 
+lim=c(-2,2), xlab="xlab", ylab="ylab")
 }
 }
+\keyword{internal}

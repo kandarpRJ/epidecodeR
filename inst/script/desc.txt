@@ -1,0 +1,80 @@
+Exploring role of m6a eraser inhibitors on differentially expressed genes in m6a dependent manner
+_________________________________________________________________________________________________
+
+Rationale
+
+We showed how epidecodeR can be applied to query the impact of chemicals impacting key enzymes associated with chemical modification dynamics on DNA and RNA. As an example, we showed the effect of FTO inhibitors on dysregulation of genes in an m6A dependent manner in NOMO-1 cell lines. 
+
+Methods
+
+Reference peak calling
+----------------------
+We identified m6A peaks in NOMO-1 cell line from m6A-seq dataset (GSE87190) using exomePeak.
+
+Following code was used to generated m6A peaks from IP and input bam files for NOMO-1 wild type cell lines
+
+library(exomePeak)
+gtf<-"hg38.gtf"
+input<-"NOMO1_PBS_input.bam"
+ip<-"NOMO1_PBS_m6a.bam"
+result=exomepeak(GENE_ANNO_GTF=gtf, GENOME="hg38",IP_BAM=ip,INPUT_BAM=input,SLIDING_STEP=50,OUTPUT_DIR="exomepeak_output",EXPERIMENT_NAME="NOMO1_WT_peaks")
+
+Peaks file "con_peak.bed" is included as part of example data in epidecodeR (NOMO-1_ref_peaks.bed)
+
+Differential gene expression analysis for FTO inhibitor (FTOi) vs control in NOMO-1 cells
+-----------------------------------------------------------------------------------------
+Read counts for genes were identified from bam files for replicates DMSO (control) & CS2 (FTOi 2) (GSE136204)
+
+We used DESeq2 for differential gene expression analysis using following code
+
+library(DESeq2)
+raw<-read.csv("samples.gc.csv", header=TRUE, row.names=1)
+metadata<-read.table("samples.metadata.txt", header=TRUE, row.names=1)
+dds<-DESeqDataSetFromMatrix(raw, metadata, design=~condition)
+keep<-rowSums(counts(dds)>5)>=5
+dds<-dds[keep,]
+dds<-DESeq(dds)
+FTOi<-results(dds, lfcThreshold=1, alpha=0.05, contrast=c("condition", "CTRL", "CS2"))
+
+Differential gene expression list is included as example data in epidecodeR (FTOi.txt)
+
+=========================================================================================================================================
+
+Exploring role of m6a writer (Mettl3) knockout on differentially expressed genes in m6a dependent manner
+_________________________________________________________________________________________________
+
+Rationale
+
+We used epidecode to analyse the impact of difference in logFC between genes based on the degree of m6A modifications on dysregulation of genes in response to m6A writer knockout (KO). 
+
+Methods
+
+Reference peak calling
+----------------------
+We identified m6A peaks in mESC cell line from m6A-seq dataset (GSE52662) using exomePeak.
+
+Following code was used to generated m6A peaks from IP and input bam files for NOMO-1 wild type cell lines
+
+library(exomePeak)
+gtf<-"mm10.gtf"
+input<-c("mESC_input_1.bam", "mESC_input_2.bam")
+ip<-c("mESC_m6a_1.bam", "mESC_m6a_2.bam")
+result=exomepeak(GENE_ANNO_GTF=gtf, GENOME="mm10",IP_BAM=ip,INPUT_BAM=input,SLIDING_STEP=50,OUTPUT_DIR="exomepeak_output",EXPERIMENT_NAME="mESC_WT_peaks")
+
+Gene wise counts of peaks was calculated and is included as part of example data in epidecodeR (eventcounts.txt)
+
+Differential gene expression analysis for Mettl3 KO vs WT in mESC cells
+-----------------------------------------------------------------------------------------
+Read counts for genes were identified from bam files for replicates DMSO (control), CS1 (FTOi 1) & CS2 (FTOi 2) (GSE136204)
+
+We used DESeq2 for differential gene expression analysis using following code
+
+library(DESeq2)
+raw<-read.csv("samples.gc.csv", row.names = 1)
+metadata<-read.table("samples.metadata.txt", header = T, sep = "\t")
+rds<-DESeqDataSetFromMatrix(raw, metadata, design = ~genotype)
+rds<-rds[rowSums(counts(rds)>10)>=2,]
+rds<-DESeq(rds)
+rnamettl3<-results(rds, lfcThreshold = 1, contrast = c("genotype", "Mettl3KO", "WT"))
+
+Differential gene expression list is included as example data in epidecodeR (deg.txt)
