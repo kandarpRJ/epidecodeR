@@ -32,13 +32,8 @@
         \item REMOVED LICENSE AND HTML files
     }}
     
-\section{Changes in version v0.99.6}{
+\section{Changes in version v0.99.4}{
     \itemize{
         \item Removed NEWS files
         \item Added NEWS.rd in inst/ dir
-    }}
-
-\section{Changes in version v0.99.9}{
-    \itemize{
-	\item Version bump
     }}
