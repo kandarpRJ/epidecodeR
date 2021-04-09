@@ -1,7 +1,7 @@
 Package: epidecodeR
 Type: Package
 Title: epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: c(person("Kandarp", "Joshi", email = "kandarpbioinfo@gmail.com",
                   role = c("aut", "cre")),
              person("Dan", "Ohtan Wang", email = "ohtan@riken.jp",
