@@ -3,15 +3,13 @@
 
 \section{Changes in version v0.99.1}{
     \itemize{
-        \item \code Created package epidecodeR
+        \item Created package epidecodeR
     }}
 
 \section{Changes in version v0.99.2}{
     \itemize{
         \item Added DESCRIPTION
         \item Added NAMESPACE
-        \item Added \code{swap_rownames} argument to plot functions, allowing selection of genes using a rowData column.
-        \item Added \code{column_annotation_colors} argument to \code{plotHeatmap}
         \item Added man pages
         \item Added inst/extdata dir
     }}
