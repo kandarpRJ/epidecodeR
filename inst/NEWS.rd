@@ -36,7 +36,7 @@
         \item Added NEWS.rd in inst/ dir
     }}
 
-\section{Changes in version v0.99.10}{
+\section{Changes in version v0.99.11}{
     \itemize{
         \item Version bump
       }}
