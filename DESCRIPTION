@@ -1,12 +1,17 @@
 Package: epidecodeR
 Type: Package
 Title: epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation
+<<<<<<< HEAD
+Version: 1.0.1
+=======
 Version: 1.1.0
+>>>>>>> upstream/master
 Authors@R: c(person("Kandarp", "Joshi", email = "kandarpbioinfo@gmail.com",
                   role = c("aut", "cre")),
              person("Dan", "Ohtan Wang", email = "ohtan@riken.jp",
                   role = "aut"))
 BugReports: https://github.com/kandarpRJ/epidecodeR/issues
+Depends: R (>= 3.1.0)
 Imports: EnvStats, ggplot2, rtracklayer, GenomicRanges, IRanges, rstatix, ggpubr, methods, stats, utils, dplyr
 biocViews: DifferentialExpression, GeneRegulation, HistoneModification, FunctionalPrediction, Transcription, GeneExpression, Epitranscriptomics, Epigenetics, FunctionalGenomics, SystemsBiology, Transcriptomics, ChipOnChip
 Description: epidecodeR is a package capable of analysing impact of degree of DNA/RNA epigenetic chemical modifications on dysregulation of genes or proteins. This package integrates chemical modification data generated from a host of epigenomic or epitranscriptomic techniques such as ChIP-seq, ATAC-seq, m6A-seq, etc. and dysregulated gene lists in the form of differential gene expression, ribosome occupancy or differential protein translation and identify impact of dysregulation of genes caused due to varying degrees of chemical modifications associated with the genes. epidecodeR generates cumulative distribution function (CDF) plots showing shifts in trend of overall log2FC between genes divided into groups based on the degree of modification associated with the genes. The tool also tests for significance of difference in log2FC between groups of genes.
