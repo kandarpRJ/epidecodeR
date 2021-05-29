@@ -40,3 +40,8 @@
     \itemize{
         \item Version bump
       }}
+      
+\section{Changes in version 1.0.1}{
+    \itemize{
+        \item Changed significance testing from one way ANOVA to nonparametric Kruskal-wallis test
+      }}
