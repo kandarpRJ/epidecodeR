@@ -375,8 +375,16 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
         names(grpcounts)<-names(grptables)
     }
 
-    test<-data.frame(aov(Order.Statistics~grp, data = ecdfdf) %>% 
-                         rstatix::tukey_hsd())
+    ktest<-ecdfdf %>% kruskal_test(Order.Statistics~grp)
+    if (ktest$p<0.05) {
+        test<-data.frame(dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
+    }
+    else {
+        test<-data.frame(dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
+        message("Nothing significant!")
+    }
+    #test<-data.frame(aov(Order.Statistics~grp, data = ecdfdf) %>% 
+    #                     rstatix::tukey_hsd())
 
 #epidecodeR<-setClass("epidecodeR", slots=list(t="data.frame", 
 #e="data.frame", eventcounts="numeric", grptables="list", grpcounts="integer",
