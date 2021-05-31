@@ -43,6 +43,5 @@
       
 \section{Changes in version 1.0.1}{
     \itemize{
-        \item Changed one way ANOVA test to Kruskal-wallis nonparametric significance test 
-        \item Changed tukey's multiple comparison test to Dunn's test
+        \item Changed significance testing from one way ANOVA to nonparametric Kruskal-wallis test
       }}
