@@ -375,12 +375,12 @@ epidecodeR<-function (events, deg, gtf_file, id_type, boundaries, pval, param, i
         names(grpcounts)<-names(grptables)
     }
 
-    ktest<-ecdfdf %>% kruskal_test(Order.Statistics~grp)
+    ktest<-ecdfdf %>% rstatix::kruskal_test(Order.Statistics~grp)
     if (ktest$p<0.05) {
-        test<-data.frame(dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
+        test<-data.frame(rstatix::dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
     }
     else {
-        test<-data.frame(dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
+        test<-data.frame(rstatix::dunn_test(Order.Statistics~grp, data = ecdfdf, p.adjust.method = "bonferroni"))
         message("Nothing significant!")
     }
     #test<-data.frame(aov(Order.Statistics~grp, data = ecdfdf) %>% 

@@ -1,12 +1,13 @@
 Package: epidecodeR
 Type: Package
 Title: epidecodeR: a functional exploration tool for epigenetic and epitranscriptomic regulation
-Version: 1.0.2
+Version: 1.1.3
 Authors@R: c(person("Kandarp", "Joshi", email = "kandarpbioinfo@gmail.com",
                   role = c("aut", "cre")),
              person("Dan", "Ohtan Wang", email = "ohtan@riken.jp",
                   role = "aut"))
 BugReports: https://github.com/kandarpRJ/epidecodeR/issues
+URL: https://github.com/kandarpRJ/epidecodeR, https://epidecoder.shinyapps.io/shinyapp
 Depends: R (>= 3.1.0)
 Imports: EnvStats, ggplot2, rtracklayer, GenomicRanges, IRanges, rstatix, ggpubr, methods, stats, utils, dplyr
 biocViews: DifferentialExpression, GeneRegulation, HistoneModification, FunctionalPrediction, Transcription, GeneExpression, Epitranscriptomics, Epigenetics, FunctionalGenomics, SystemsBiology, Transcriptomics, ChipOnChip
